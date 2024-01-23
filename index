@@ -1,1 +1,37 @@
 gino pepperoni
+
+<html>
+<head>
+<title>Monster Generator</title>
+<script>
+// A function to generate a random monster
+function generateMonster() {
+  // A list of possible monster names
+  var names = ["Goblin", "Orc", "Dragon", "Zombie", "Vampire", "Werewolf", "Mummy", "Skeleton", "Ghost", "Demon", "Giant", "Troll", "Ogre", "Hydra", "Kraken", "Beholder", "Mind Flayer", "Lich", "Mimic", "Gelatinous Cube"];
+  // A list of possible monster sizes
+  var sizes = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"];
+  // A list of possible monster types
+  var types = ["Aberration", "Beast", "Celestial", "Honos", "Dragon", "Elemental", "Fey", "Fiend", "Giant", "Humanoid", "Monstrosity", "Ooze", "Plant", "Undead"];
+  // A list of possible monster alignments
+  var alignments = ["Lawful Good", "Neutral Good", "Chaotic Good", "Lawful Neutral", "True Neutral", "Chaotic Neutral", "Lawful Evil", "Neutral Evil", "Chaotic Evil"];
+  // A random index for each list
+  var nameIndex = Math.floor(Math.random() * names.length);
+  var sizeIndex = Math.floor(Math.random() * sizes.length);
+  var typeIndex = Math.floor(Math.random() * types.length);
+  var alignmentIndex = Math.floor(Math.random() * alignments.length);
+  // A string to display the monster
+  var monster = "Your monster is a " + sizes[sizeIndex] + " " + names[nameIndex] + ", a " + types[typeIndex] + " with an mein of " + alignments[alignmentIndex] + ".";
+  // A reference to the HTML element with id="result"
+  var result = document.getElementById("result");
+  // Set the innerHTML of the result element to the monster string
+  result.innerHTML = monster;
+}
+</script>
+</head>
+<body>
+<h1>Monster Generator</h1>
+<p>Click the button below to generate a random monster for your TTRPG.</p>
+<button onclick="generateMonster()">Generate Monster</button>
+<p id="result"></p>
+</body>
+</html>
