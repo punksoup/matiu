@@ -1,37 +1,86 @@
-gino pepperoni
-
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<title>Monster Generator</title>
-<script>
-// A function to generate a random monster
-function generateMonster() {
-  // A list of possible monster names
-  var names = ["Goblin", "Orc", "Dragon", "Zombie", "Vampire", "Werewolf", "Mummy", "Skeleton", "Ghost", "Demon", "Giant", "Troll", "Ogre", "Hydra", "Kraken", "Beholder", "Mind Flayer", "Lich", "Mimic", "Gelatinous Cube"];
-  // A list of possible monster sizes
-  var sizes = ["Tiny", "Small", "Medium", "Large", "Huge", "Gargantuan"];
-  // A list of possible monster types
-  var types = ["Aberration", "Beast", "Celestial", "Honos", "Dragon", "Elemental", "Fey", "Fiend", "Giant", "Humanoid", "Monstrosity", "Ooze", "Plant", "Undead"];
-  // A list of possible monster alignments
-  var alignments = ["Lawful Good", "Neutral Good", "Chaotic Good", "Lawful Neutral", "True Neutral", "Chaotic Neutral", "Lawful Evil", "Neutral Evil", "Chaotic Evil"];
-  // A random index for each list
-  var nameIndex = Math.floor(Math.random() * names.length);
-  var sizeIndex = Math.floor(Math.random() * sizes.length);
-  var typeIndex = Math.floor(Math.random() * types.length);
-  var alignmentIndex = Math.floor(Math.random() * alignments.length);
-  // A string to display the monster
-  var monster = "Your monster is a " + sizes[sizeIndex] + " " + names[nameIndex] + ", a " + types[typeIndex] + " with an mein of " + alignments[alignmentIndex] + ".";
-  // A reference to the HTML element with id="result"
-  var result = document.getElementById("result");
-  // Set the innerHTML of the result element to the monster string
-  result.innerHTML = monster;
-}
-</script>
+  <meta charset="UTF-8">
+  <title>Random Adventure Generator</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f4f4;
+      text-align: center;
+      padding: 2em;
+    }
+    h1 {
+      color: #4b0082;
+    }
+    button {
+      padding: 1em 2em;
+      font-size: 1.2em;
+      background-color: #6a5acd;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #483d8b;
+    }
+    #adventure {
+      margin-top: 2em;
+      font-size: 1.3em;
+      color: #333;
+    }
+  </style>
 </head>
 <body>
-<h1>Monster Generator</h1>
-<p>Click the button below to generate a random monster for your TTRPG.</p>
-<button onclick="generateMonster()">Generate Monster</button>
-<p id="result"></p>
+
+  <h1>🎲 Random Adventure Generator</h1>
+  <button onclick="generateAdventure()">Generate Adventure</button>
+  <div id="adventure"></div>
+
+  <script>
+    const hooks = [
+      "A sacred relic has gone missing",
+      "A village is plagued by nightmares",
+      "An ancient spirit calls for aid",
+      "A forbidden ritual is underway",
+      "A storm reveals something buried"
+    ];
+
+    const locations = [
+      "in the misty forest of Te Wao Nui",
+      "beneath the ruins of a forgotten pā",
+      "on the windswept coast of Te Tai Poutini",
+      "within the volcanic heart of Mt. Ahi",
+      "inside a drifting marae in the spirit realm"
+    ];
+
+    const antagonists = [
+      "a corrupted atua",
+      "a rogue tohunga",
+      "a colonial expedition",
+      "a cursed taniwha",
+      "a grieving ancestor spirit"
+    ];
+
+    const twists = [
+      "but the true threat lies within the party",
+      "and time is unraveling around them",
+      "yet the antagonist seeks redemption",
+      "and the land itself fights back",
+      "but the relic was never meant to be found"
+    ];
+
+    function generateAdventure() {
+      const hook = hooks[Math.floor(Math.random() * hooks.length)];
+      const location = locations[Math.floor(Math.random() * locations.length)];
+      const antagonist = antagonists[Math.floor(Math.random() * antagonists.length)];
+      const twist = twists[Math.floor(Math.random() * twists.length)];
+
+      const adventure = `${hook} ${location}, opposed by ${antagonist}—${twist}.`;
+      document.getElementById("adventure").innerText = adventure;
+    }
+  </script>
+
 </body>
 </html>
