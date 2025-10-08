@@ -1,84 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Random Adventure Generator</title>
+  <meta charset="UTF-8" />
+  <title>Urban Hexcrawl District Generator</title>
   <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #f4f4f4;
-      text-align: center;
-      padding: 2em;
-    }
-    h1 {
-      color: #4b0082;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #f0f0f0; padding: 20px; }
+    h1 { color: #333; }
     button {
-      padding: 1em 2em;
-      font-size: 1.2em;
-      background-color: #6a5acd;
+      background-color: #333;
       color: white;
+      padding: 10px 20px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       cursor: pointer;
+      font-size: 16px;
     }
-    button:hover {
-      background-color: #483d8b;
+    button:hover { background-color: #555; }
+    .result {
+      margin-top: 20px;
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
-    #adventure {
-      margin-top: 2em;
-      font-size: 1.3em;
-      color: #333;
-    }
+    .result h2 { margin-top: 0; }
+    .label { font-weight: bold; color: #005a5a; }
   </style>
 </head>
 <body>
 
-  <h1>🎲 Random Adventure Generator</h1>
-  <button onclick="generateAdventure()">Generate Adventure</button>
-  <div id="adventure"></div>
+  <h1>Urban Hexcrawl: Create District</h1>
+  <button onclick="generateDistrict()">Create District</button>
+
+  <div class="result" id="districtOutput"></div>
 
   <script>
-    const hooks = [
-      "A sacred relic has gone missing",
-      "A village is plagued by nightmares",
-      "An ancient spirit calls for aid",
-      "A forbidden ritual is underway",
-      "A storm reveals something buried"
-    ];
+    const districtTypes = ["Market / Bazaar", "Slum / Tenement", "Noble Estate", "Industrial Zone", "Temple Quarter", "Entertainment", "Bureaucratic", "Dockside / Waterfront", "Archive or Library", "Criminal", "Residential", "Ruin"];
+    const features = ["Underground entrance", "Street performer draws a crowd", "Statue with hidden meaning", "Graffiti with coded message", "Public fountain or shrine", "Guard post / checkpoint", "Collapsed building / rubble", "Rooftop garden / lookout", "Secret alley / shortcut", "Rumour board / info kiosk"];
+    const encounters = ["Street gang confrontation", "Merchant with rare goods", "Local protest or riot", "City guard patrol", "Cult ritual in progress", "Pickpocket or scam artist", "Mysterious stranger offers help", "Urban wildlife"];
+    const terrainModifiers = ["Narrow alleys (half speed)", "Crowded thoroughfare", "Fog / smoke obscures vision", "Rooftop access available", "Flooded / muddy streets", "Construction zone / debris"];
+    const factions = ["Local gang", "Merchant guild", "Religious sect", "City bureaucracy", "Foreign agents / spies", "Revolutionary cell"];
+    const hiddenElements = ["Hidden cache or stash", "Secret meeting in progress", "Magical anomaly", "Surveillance device", "Tunnel to another district", "Cursed object or relic", "Wanted fugitive hiding here", "Forgotten lore or map piece"];
+    const secrets = ["Humming with arcane energy", "Preserved fossil of a gigantic creature", "Signs of human experimentation", "Forgotten grave of an ancient queen", "Path into the veins of the earth", "Rift to another dimension"];
 
-    const locations = [
-      "in the misty forest of Te Wao Nui",
-      "beneath the ruins of a forgotten pā",
-      "on the windswept coast of Te Tai Poutini",
-      "within the volcanic heart of Mt. Ahi",
-      "inside a drifting marae in the spirit realm"
-    ];
+    function roll(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
 
-    const antagonists = [
-      "a corrupted atua",
-      "a rogue tohunga",
-      "a colonial expedition",
-      "a cursed taniwha",
-      "a grieving ancestor spirit"
-    ];
+    function generateDistrict() {
+      const district = roll(districtTypes);
+      const feature = roll(features);
+      const encounter = roll(encounters);
+      const terrain = roll(terrainModifiers);
+      const faction = roll(factions);
+      const hidden = roll(hiddenElements);
+      const secret = roll(secrets);
 
-    const twists = [
-      "but the true threat lies within the party",
-      "and time is unraveling around them",
-      "yet the antagonist seeks redemption",
-      "and the land itself fights back",
-      "but the relic was never meant to be found"
-    ];
+      const output = `
+        <h2>🧱 District Summary</h2>
+        <p><span class="label">District Type:</span> ${district}</p>
+        <p><span class="label">Local Feature:</span> ${feature}</p>
+        <p><span class="label">Encounter:</span> ${encounter}</p>
+        <p><span class="label">Terrain Modifier:</span> ${terrain}</p>
+        <p><span class="label">Faction Influence:</span> ${faction}</p>
+        <p><span class="label">Hidden Element:</span> ${hidden}</p>
+        <p><span class="label">Secret:</span> ${secret}</p>
+      `;
 
-    function generateAdventure() {
-      const hook = hooks[Math.floor(Math.random() * hooks.length)];
-      const location = locations[Math.floor(Math.random() * locations.length)];
-      const antagonist = antagonists[Math.floor(Math.random() * antagonists.length)];
-      const twist = twists[Math.floor(Math.random() * twists.length)];
-
-      const adventure = `${hook} ${location}, opposed by ${antagonist}—${twist}.`;
-      document.getElementById("adventure").innerText = adventure;
+      document.getElementById("districtOutput").innerHTML = output;
     }
   </script>
 
