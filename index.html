@@ -4,73 +4,63 @@
   <meta charset="UTF-8" />
   <title>Urban Hexcrawl District Generator</title>
   <style>
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond&family=Raleway:wght@600&display=swap');
 
 body {
-  font-family: 'UnifrakturCook', cursive;
-  background: #000;
-  color: #fdfd96;
-  padding: 40px;
-  text-shadow: 1px 1px #ff00ff;
-  animation: pulse 10s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0%, 100% { background-color: #000; }
-  50% { background-color: #111; }
+  font-family: 'EB Garamond', serif;
+  background: #fdf6e3;
+  color: #3c2f2f;
+  padding: 30px;
+  background-image: url('https://www.transparenttextures.com/patterns/wood-pattern.png');
 }
 
 h1 {
-  font-size: 3em;
-  color: #ff00ff;
+  font-family: 'Raleway', sans-serif;
+  font-size: 2.5em;
+  color: #5c4d3f;
   text-align: center;
-  margin-bottom: 30px;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  text-shadow: 2px 2px #ffcc00;
+  margin-bottom: 20px;
+  text-shadow: 1px 1px #d6c6a3;
+  border-bottom: 2px dashed #a89c8e;
+  padding-bottom: 10px;
 }
 
 #spellbox {
-  background: #111;
-  border: 3px solid #ff00ff;
-  border-radius: 0;
-  padding: 30px;
-  box-shadow: 0 0 20px #ff00ff;
-  max-width: 800px;
+  background: #fffaf0;
+  border: 2px solid #a89c8e;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 0 10px #d6c6a3;
+  max-width: 700px;
   margin: auto;
-  transform: rotate(-1deg);
+  font-size: 18px;
+  line-height: 1.6;
 }
 
 button {
-  background-color: #ffcc00;
-  color: #000;
+  background-color: #c2b280;
+  color: #2f2f2f;
   font-weight: bold;
-  border: 2px solid #ff00ff;
-  padding: 12px 24px;
-  font-size: 18px;
+  border: 2px solid #5c4d3f;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-size: 16px;
   cursor: pointer;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  box-shadow: 2px 2px 5px #ff00ff;
+  box-shadow: 2px 2px 5px #d6c6a3;
   transition: background-color 0.3s ease;
 }
 
 button:hover {
-  background-color: #ff00ff;
-  color: #fff;
+  background-color: #a89c8e;
 }
 
 #spell {
-  font-size: 20px;
-  line-height: 1.6;
-  color: #fdfd96;
-  margin-top: 20px;
   font-style: italic;
-  border-top: 2px dashed #ff00ff;
-  padding-top: 20px;
+  color: #5c4d3f;
+  margin-top: 20px;
+  border-top: 1px dashed #a89c8e;
+  padding-top: 15px;
 }
-
- 
   </style>
 </head>
 <body>
