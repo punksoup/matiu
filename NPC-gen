@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>NPC Generator</title>
+  <style>
+    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
+    #npc { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
+    button { padding: 10px 20px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>NPC Generator</h1>
+  <div id="npc">
+    <p><strong>Name:</strong> <span id="name"></span></p>
+    <p><strong>Role:</strong> <span id="role"></span></p>
+    <p><strong>Trait:</strong> <span id="trait"></span></p>
+    <p><strong>Quirk:</strong> <span id="quirk"></span></p>
+    <p><strong>Inventory:</strong> <span id="inventory"></span></p>
+  </div>
+  <button onclick="generateNPC()">Generate NPC</button>
+
+  <script>
+    const maleNames = ["Alton","Ander","Cade","Corrin","Eldon","Errich","Finnan","Garret","Lindal","Lyle","Merric","Milo","Osborn","Perrin","Reed","Roscoe","Wellby","Brynlor","Brynmor","Caderyn","Caelnor","Calthor","Frienn","Geret","Gorne","Jerold","Lorfe","Oisin","Pango","Pierwick","Willet","Yorpe","Horne","Tuathar","Bartlebee","Forby"];
+    const femaleNames = ["Andry","Bree","Callie","Cora","Euphemia","Jillian","Kithri","Lavinia","Lidda","Merla","Nedda","Paela","Portia","Seraphina","Shaena","Trym","Vani","Verna","Primrose","Brunhilda","Cynbelin","Dalrae","Caeloria","Celtara","Finola","Gwenneth","Helga","Mildred","Liridian","Lirneth","Síofra","Rhysa","Morritha","Morwen","Niamara","Norgwe"];
+    const familyNames = ["Brushgather","Strongbarrel","Greenbottle","High-hill","Hilltopple","Leafgaggle","Tealeaf","Thornwallis","Tosscobble","Babblewish","Bristlehiem","Denheath","Bellowmainge","Branwick","Caradoc","Dondle","Dormount","Gillwillop","Glimp","Firglen","Farseer","Filker","Goldwhip","Hobnail","Horgiff","Lamplighter","Hornjug","Gwynthorn","Grimp","Pugsley","Stilwater","Swoggle","Tallow","Talwyn","Taranis","Tomefeather"];
+
+    const roles = ["Scout", "Merchant", "Wanderer", "Guard", "Outcast", "Healer", "Spy", "Tinker"];
+    const quirks = ["Talks to birds", "Wears mismatched boots", "Collects broken weapons", "Refuses to sleep indoors", "Sings in battle", "Carries a cursed map"];
+
+    const items = [
+      "a chipped ceramic teapot", "a faithful trowel", "a flask of oil", "a gnome follower called Rama",
+      "a small suit of armor", "a backpack", "a bear trap", "bone dice", "bow and arrows", "daggers",
+      "a calling whistle", "a cloak (green)", "a cloak (black)", "a cloak (blue)", "dice", "a favourite book",
+      "a flask", "flint and steel", "a hammer", "a handaxe", "a hatchet", "a herbal medicine kit", "a journal",
+      "a lantern", "leather armour", "a magnifying glass", "manacles", "marbles", "a melee weapon (spear)",
+      "a mirror", "a net", "an old-fashioned pipe", "a panflute", "a piece of armor (helmet)", "pitons",
+      "a vial of basic poison", "a ranged weapon (crossbow)", "a ration (dried fish)", "rations (1 day)",
+      "rope, hempen (50 feet)", "rope, silk (50 feet)", "scissors", "starting items", "a talking canary",
+      "a tent (four-person)", "a tent (two-person)", "a tinderbox", "a torch", "a vial", "a wide-brimmed hat",
+      "wire", "a worn necklace"
+    ];
+
+    const traitLookup = {
+      "a chipped ceramic teapot": "Sentimental", "a faithful trowel": "Grounded", "a flask of oil": "Prepared",
+      "a gnome follower called Rama": "Eccentric", "a small suit of armor": "Aspiring", "a backpack": "Wanderer",
+      "a bear trap": "Paranoid", "bone dice": "Risky", "bow and arrows": "Precise", "daggers": "Sneaky",
+      "a calling whistle": "Alert", "a cloak (green)": "Wary", "a cloak (black)": "Cunning", "a cloak (blue)": "Noble",
+      "dice": "Chaotic", "a favourite book": "Obsessive", "a flask": "Survivor", "flint and steel": "Independent",
+      "a hammer": "Builder", "a handaxe": "Practical", "a hatchet": "Rugged", "a herbal medicine kit": "Compassionate",
+      "a journal": "Reflective", "a lantern": "Guiding", "leather armour": "Tough", "a magnifying glass": "Curious",
+      "manacles": "Authoritarian", "marbles": "Playful", "a melee weapon (spear)": "Bold", "a mirror": "Vain",
+      "a net": "Tactical", "an old-fashioned pipe": "Wise", "a panflute": "Whimsical", "a piece of armor (helmet)": "Veteran",
+      "pitons": "Climber", "a vial of basic poison": "Dangerous", "a ranged weapon (crossbow)": "Focused",
+      "a ration (dried fish)": "Frugal", "rations (1 day)": "Prepared", "rope, hempen (50 feet)": "Reliable",
+      "rope, silk (50 feet)": "Elegant", "scissors": "Precise", "starting items": "Ordinary", "a talking canary": "Cheerful",
+      "a tent (four-person)": "Leader", "a tent (two-person)": "Loner", "a tinderbox": "Resourceful", "a torch": "Brave",
+      "a vial": "Experimental", "a wide-brimmed hat": "Practical", "wire": "Tinkerer", "a worn necklace": "Sentimental"
+    };
+
+    function generateNPC() {
+      const isMale = Math.random() < 0.5;
+      const firstName = isMale ? random(maleNames) : random(femaleNames);
+      const lastName = random(familyNames);
+      const fullName = `${firstName} ${lastName}`;
+
+      const item1 = random(items);
+      const item2 = random(items);
+      const trait1 = traitLookup[item1] || "Mysterious";
+      const trait2 = traitLookup[item2] || "Mysterious";
+      const combinedTrait = trait1 === trait2 ? trait1 : `${trait1}, ${trait2}`;
+
+      document.getElementById("name").textContent = fullName;
+      document.getElementById("role").textContent = random(roles);
+      document.getElementById("trait").textContent = combinedTrait;
+      document.getElementById("quirk").textContent = random(quirks);
+      document.getElementById("inventory").textContent = `${item1} and ${item2}`;
+    }
+
+    function random(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    // Generate one on load
+    generateNPC();
+  </script>
+</body>
+</html>
