@@ -2,79 +2,107 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>NPC Generator</title>
+  <title>Weird Spell Generator</title>
   <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; }
-    #npc { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
-    button { padding: 10px 20px; margin-top: 10px; }
+    body { font-family: serif; background: #f4f4f4; padding: 20px; }
+    #spellbox { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 8px #aaa; max-width: 700px; margin: auto; }
+    button { padding: 10px 20px; margin-top: 15px; font-size: 16px; }
+    h1 { text-align: center; }
+    #spell { font-size: 18px; margin-top: 10px; }
   </style>
 </head>
 <body>
-  <h1>NPC Generator</h1>
-  <div id="npc">
-    <p><strong>Name:</strong> <span id="name"></span></p>
-    <p><strong>Role:</strong> <span id="role"></span></p>
-    <p><strong>Trait:</strong> <span id="trait"></span></p>
-    <p><strong>Quirk:</strong> <span id="quirk"></span></p>
-    <p><strong>Inventory:</strong> <span id="inventory"></span></p>
+  <h1>🪄 Weird Spell Generator</h1>
+  <div id="spellbox">
+    <p id="spell"></p>
+    <button onclick="generateSpell()">Generate Spell</button>
   </div>
-  <button onclick="generateNPC()">Generate NPC</button>
 
   <script>
-    const maleNames = ["Alton","Ander","Cade","Corrin","Eldon","Errich","Finnan","Garret","Lindal","Lyle","Merric","Milo","Osborn","Perrin","Reed","Roscoe","Wellby","Brynlor","Brynmor","Caderyn","Caelnor","Calthor","Frienn","Geret","Gorne","Jerold","Lorfe","Oisin","Pango","Pierwick","Willet","Yorpe","Horne","Tuathar","Bartlebee","Forby"];
-    const femaleNames = ["Andry","Bree","Callie","Cora","Euphemia","Jillian","Kithri","Lavinia","Lidda","Merla","Nedda","Paela","Portia","Seraphina","Shaena","Trym","Vani","Verna","Primrose","Brunhilda","Cynbelin","Dalrae","Caeloria","Celtara","Finola","Gwenneth","Helga","Mildred","Liridian","Lirneth","Síofra","Rhysa","Morritha","Morwen","Niamara","Norgwe"];
-    const familyNames = ["Brushgather","Strongbarrel","Greenbottle","High-hill","Hilltopple","Leafgaggle","Tealeaf","Thornwallis","Tosscobble","Babblewish","Bristlehiem","Denheath","Bellowmainge","Branwick","Caradoc","Dondle","Dormount","Gillwillop","Glimp","Firglen","Farseer","Filker","Goldwhip","Hobnail","Horgiff","Lamplighter","Hornjug","Gwynthorn","Grimp","Pugsley","Stilwater","Swoggle","Tallow","Talwyn","Taranis","Tomefeather"];
-
-    const roles = ["Scout", "Merchant", "Wanderer", "Guard", "Outcast", "Healer", "Spy", "Tinker"];
-    const quirks = ["Talks to birds", "Wears mismatched boots", "Collects broken weapons", "Refuses to sleep indoors", "Sings in battle", "Carries a cursed map"];
-
-    const items = [
-      "a chipped ceramic teapot", "a faithful trowel", "a flask of oil", "a gnome follower called Rama",
-      "a small suit of armor", "a backpack", "a bear trap", "bone dice", "bow and arrows", "daggers",
-      "a calling whistle", "a cloak (green)", "a cloak (black)", "a cloak (blue)", "dice", "a favourite book",
-      "a flask", "flint and steel", "a hammer", "a handaxe", "a hatchet", "a herbal medicine kit", "a journal",
-      "a lantern", "leather armour", "a magnifying glass", "manacles", "marbles", "a melee weapon (spear)",
-      "a mirror", "a net", "an old-fashioned pipe", "a panflute", "a piece of armor (helmet)", "pitons",
-      "a vial of basic poison", "a ranged weapon (crossbow)", "a ration (dried fish)", "rations (1 day)",
-      "rope, hempen (50 feet)", "rope, silk (50 feet)", "scissors", "starting items", "a talking canary",
-      "a tent (four-person)", "a tent (two-person)", "a tinderbox", "a torch", "a vial", "a wide-brimmed hat",
-      "wire", "a worn necklace"
+    const fragments = [
+      "You Become Fluent In All Languages.",
+      "You Sculpt Stone Into Any Form.",
+      "You Become A Swarm Of Crows, Rats, Or Piranhas.",
+      "You Summon A Floating Disk That Holds 100lbs.",
+      "You Switch Bodies With A Creature You Touch.",
+      "You Summon A Poisonous Cloud (1d6 STR Loss).",
+      "You Spawn 1d6 Decoy Duplicates.",
+      "You Send A Short Message 1 Mile.",
+      "You Summon A Flaming Wall Up To 15ft Wide.",
+      "You Become A Living Jelly.",
+      "You Summon A Noiseless Illusion.",
+      "You And A Sympathetic Ally Are Linked.",
+      "You Summon A Refuge For 8 People.",
+      "You Perform A Minor Magical Trick.",
+      "You Assume The Likeness Of A Creature You've Seen.",
+      "You Summon A Powerful Wind That Deflects Arrows.",
+      "WIL Save Or Target Laughs Uncontrollably.",
+      "WIL Save Or Target Is Transformed Into A Harmless Animal.",
+      "WIL Save Or Creature Returns To Its Native Plane.",
+      "You Spread Sticky Spiderwebs Within A 20ft Radius.",
+      "You And Anyone Touching You Teleport To A Known Location.",
+      "You Become Any Inanimate Object Between The Size Of A Piano And An Apple.",
+      "You Summon An Invisible Creature That Obeys Your Command.",
+      "You See Through All Nearby Illusions.",
+      "You Write A Letter Only Its Reader Can Understand.",
+      "You Use Telekinesis To Fly, Glide, Or Levitate.",
+      "Undead Creatures Obey Your Command. Intelligent Undead Make A WIL Save.",
+      "Two Objects Within 10ft Cannot Be Moved More Than 10ft Apart.",
+      "Two Objects Are Strongly Magnetically Repelled Within 10ft.",
+      "Two Objects Are Strongly Magnetically Attracted Within 10ft.",
+      "Two Creatures You Can See Instantly Switch Places.",
+      "Two Creatures Can Hear Each Other's Thoughts, No Matter How Far Apart.",
+      "Two Allies Can Communicate Via A Mental Link For The Rest Of The Day.",
+      "You Turn Any Object Into A Permanent, Heatless Torch.",
+      "You Turn The Target Into A Bullfrog.",
+      "You Transform The Target Into Another Creature Of Similar Size And Mass.",
+      "You Transform Raw Materials Into Finished Items.",
+      "Time In A 50ft Bubble Slows Down Or Speeds Up By 10% For 30 Seconds."
     ];
 
-    const traitLookup = {
-      "a chipped ceramic teapot": "Sentimental", "a faithful trowel": "Grounded", "a flask of oil": "Prepared",
-      "a gnome follower called Rama": "Eccentric", "a small suit of armor": "Aspiring", "a backpack": "Wanderer",
-      "a bear trap": "Paranoid", "bone dice": "Risky", "bow and arrows": "Precise", "daggers": "Sneaky",
-      "a calling whistle": "Alert", "a cloak (green)": "Wary", "a cloak (black)": "Cunning", "a cloak (blue)": "Noble",
-      "dice": "Chaotic", "a favourite book": "Obsessive", "a flask": "Survivor", "flint and steel": "Independent",
-      "a hammer": "Builder", "a handaxe": "Practical", "a hatchet": "Rugged", "a herbal medicine kit": "Compassionate",
-      "a journal": "Reflective", "a lantern": "Guiding", "leather armour": "Tough", "a magnifying glass": "Curious",
-      "manacles": "Authoritarian", "marbles": "Playful", "a melee weapon (spear)": "Bold", "a mirror": "Vain",
-      "a net": "Tactical", "an old-fashioned pipe": "Wise", "a panflute": "Whimsical", "a piece of armor (helmet)": "Veteran",
-      "pitons": "Climber", "a vial of basic poison": "Dangerous", "a ranged weapon (crossbow)": "Focused",
-      "a ration (dried fish)": "Frugal", "rations (1 day)": "Prepared", "rope, hempen (50 feet)": "Reliable",
-      "rope, silk (50 feet)": "Elegant", "scissors": "Precise", "starting items": "Ordinary", "a talking canary": "Cheerful",
-      "a tent (four-person)": "Leader", "a tent (two-person)": "Loner", "a tinderbox": "Resourceful", "a torch": "Brave",
-      "a vial": "Experimental", "a wide-brimmed hat": "Practical", "wire": "Tinkerer", "a worn necklace": "Sentimental"
-    };
+    const items = [
+      "Lich Dust", "Troll Heart", "Staff of Frostbite", "Bedroll (1 sp, 5 lb)",
+      "Chainmail Armour", "Grang’s Mace", "Rusty Chainmail Armour +3", "Swampbank Root Shoes",
+      "Staff of Alacrity", "Cloak of Arachnida", "Fancy Hat", "Glogg", "Grasshopper Fizz", "Hot Grog",
+      "Orb of Protection", "Amanita", "Ash Murky Ale", "Beans", "Blue Mushroom", "Burnt Lightning Mead",
+      "Cured Meat", "Nettle Soup", "Rations (Preserved)", "Rations (Unpreserved)", "Spices", "Spider Meat",
+      "Toad's Root Fungus", "Toadstool", "Verry Berry Cider", "Yellowcap Shroom", "Greenshroom", "Inkcap",
+      "Cloak of Invisibility", "Holy Symbol of Anabachaz", "Onyx Ox", "Garlic", "Hanging Moss", "Taproot",
+      "Wolfsbane", "Barkroot Rain Necklace", "Blank Spell Book", "Blank Spell Scroll", "Bloodmoss",
+      "Bloodstone Orb", "Bone Necklace", "Cerulean Star Gem", "Dark Orb", "Doom Seed", "Dragon's Star Ruby",
+      "Driftglobe", "Dust of Disappearance", "Earth Rune", "Elixir of Strength", "Eye of Newt", "Faerie Dust",
+      "Gem of Seeing", "Helm of Power", "Panflute", "Scroll of the Dead", "Sage", "Barkroot Hedge Plant"
+    ];
 
-    function generateNPC() {
-      const isMale = Math.random() < 0.5;
-      const firstName = isMale ? random(maleNames) : random(femaleNames);
-      const lastName = random(familyNames);
-      const fullName = `${firstName} ${lastName}`;
+    const styles = [
+      "Bloodthirsty", "Relentless", "Stealthy", "Savage", "Frenzied", "Brave"
+    ];
 
-      const item1 = random(items);
-      const item2 = random(items);
-      const trait1 = traitLookup[item1] || "Mysterious";
-      const trait2 = traitLookup[item2] || "Mysterious";
-      const combinedTrait = trait1 === trait2 ? trait1 : `${trait1}, ${trait2}`;
+    const descriptors = [
+      "Aggressive", "Curious", "Mercurial", "Overly Friendly", "Perturbed", "Abstracted", "Acquisitive", "Adventurous",
+      "Agile", "Austere", "Barbaric", "Beatific", "Bellicose", "Belligerent", "Botanical", "Cautious", "Challenging",
+      "Charismatic", "Confused", "Contemplative", "Creative", "Cruel", "Deceitful", "Defensive", "Depressed",
+      "Detached", "Dismissive", "Dormant", "Doubting", "Empathetic", "Exhilarated", "Gluttonous", "Gossipy",
+      "Gregarious", "Grieving", "Guarded", "Guileful", "Gullible", "Happy", "Hateful", "Heedful", "Hostile",
+      "Hungry", "Hunting", "Impassioned", "Imperious", "Inquisitive", "Insightful", "Insolent", "Intolerant",
+      "Lingering Regret", "Linguistic", "Logical", "Loyal", "Malicious", "Melancholic", "Mercantile", "Nauseated",
+      "Observant", "Obstinate", "Paranoid", "Pessimistic", "Petulant", "Pious", "Preoccupied", "Probing",
+      "Questioning", "Quick", "Quizzical", "Rapt", "Rebellious", "Resigned", "Rowdy", "Sarcastic", "Scholarly",
+      "Severe", "Shameful", "Sickly", "Sincere", "Skulking", "Sleeping", "Smug", "Sneaky", "Sombre", "Spiteful",
+      "Stationary", "Strong", "Sullen", "Suspicious", "Tearful", "Tentative", "Threatening", "Timid", "Tired",
+      "Tracking", "Tranquil", "Unhappy", "Unperturbed", "Unstable", "Urbane", "Vicious", "Violent", "Virulent",
+      "Watchful", "Wrathful"
+    ];
 
-      document.getElementById("name").textContent = fullName;
-      document.getElementById("role").textContent = random(roles);
-      document.getElementById("trait").textContent = combinedTrait;
-      document.getElementById("quirk").textContent = random(quirks);
-      document.getElementById("inventory").textContent = `${item1} and ${item2}`;
+    function generateSpell() {
+      const part1 = random(fragments);
+      const part2 = random(fragments);
+      const part3 = random(fragments);
+      const item = random(items);
+      const style = random(styles);
+      const descriptor = random(descriptors);
+      const spell = `${part1} ${part2} ${part3} ⚠️ To cast this spell, the caster must possess: ${item}. It must be cast in a ${style} manner. The spell radiates a ${descriptor} aura.`;
+      document.getElementById("spell").textContent = spell;
     }
 
     function random(arr) {
@@ -82,7 +110,7 @@
     }
 
     // Generate one on load
-    generateNPC();
+    generateSpell();
   </script>
 </body>
 </html>
