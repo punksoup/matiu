@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Moonbase Idle Game</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #eee; padding: 20px; }
+    .section { margin-bottom: 20px; }
+    button { padding: 10px; margin: 5px; }
+    .status { font-weight: bold; }
+  </style>
+</head>
+<body>
+  <h1>🌕 Moonbase</h1>
+
+  <div class="section">
+    <p class="status">Round: <span id="round">1</span> / 5</p>
+    <p class="status">Workers: <span id="workers">2</span></p>
+    <p class="status">Habitats: <span id="habitats">0</span></p>
+    <p class="status">Life Support: <span id="lifeSupport">5</span></p>
+    <p class="status">Happiness: <span id="happiness">5</span></p>
+  </div>
+
+  <div class="section">
+    <button onclick="queueModule('habitat')">Queue Habitat (3 rounds)</button>
+    <button onclick="queueModule('hydroponics')">Queue Hydroponics</button>
+    <button onclick="queueModule('recDome')">Queue Rec Dome</button>
+    <p>Construction Queue:</p>
+    <ul id="queue"></ul>
+  </div>
+
+  <div class="section">
+    <button onclick="nextRound()">Advance Round</button>
+    <p id="log"></p>
+  </div>
+
+  <script>
+    let round = 1;
+    let workers = 2;
+    let habitats = 0;
+    let lifeSupport = 5;
+    let happiness = 5;
+    let queue = [];
+
+    function queueModule(type) {
+      queue.push({ type, time: type === 'habitat' ? 3 : 2 });
+      updateQueue();
+    }
+
+    function updateQueue() {
+      const list = document.getElementById('queue');
+      list.innerHTML = '';
+      queue.forEach((item, i) => {
+        const li = document.createElement('li');
+        li.textContent = `${item.type} (${item.time} rounds left)`;
+        list.appendChild(li);
+      });
+    }
+
+    function nextRound() {
+      round++;
+      if (round > 5) {
+        document.getElementById('log').textContent = lifeSupport >= 25 ? "Victory! Moonbase is sustainable." : "Collapse! Moonbase failed.";
+        return;
+      }
+
+      // Process queue
+      queue.forEach(item => item.time--);
+      const completed = queue.filter(item => item.time <= 0);
+      queue = queue.filter(item => item.time > 0);
+
+      completed.forEach(item => {
+        if (item.type === 'habitat') {
+          habitats++;
+          workers++;
+        } else if (item.type === 'hydroponics') {
+          lifeSupport += 5;
+        } else if (item.type === 'recDome') {
+          happiness += 2;
+        }
+      });
+
+      // Decay if unsupported
+      if (habitats > 0 && (lifeSupport < habitats * 5 || happiness < habitats * 2)) {
+        lifeSupport -= 5;
+        happiness -= 2;
+        workers = Math.max(1, workers - 1);
+        document.getElementById('log').textContent = "Warning: Habitats under-supported!";
+      } else {
+        lifeSupport += 5;
+        happiness += 1;
+        document.getElementById('log').textContent = "Base stable. Crew thriving.";
+      }
+
+      // Update UI
+      document.getElementById('round').textContent = round;
+      document.getElementById('workers').textContent = workers;
+      document.getElementById('habitats').textContent = habitats;
+      document.getElementById('lifeSupport').textContent = lifeSupport;
+      document.getElementById('happiness').textContent = happiness;
+      updateQueue();
+    }
+  </script>
+</body>
+</html>
