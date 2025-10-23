@@ -8,21 +8,22 @@
     .section { margin-bottom: 20px; }
     button { padding: 10px; margin: 5px; }
     .status { font-weight: bold; }
+    progress { width: 150px; margin-left: 10px; }
   </style>
 </head>
 <body>
   <h1>🌕 Moonbase</h1>
 
   <div class="section">
-    <p class="status">Round: <span id="round">1</span> / 5</p>
-    <p class="status">Workers: <span id="workers">2</span></p>
+    <p class="status">Day: <span id="day">1</span></p>
+    <p class="status">Workers: <span id="workers">👨‍🚀👨‍🚀</span></p>
     <p class="status">Habitats: <span id="habitats">0</span></p>
     <p class="status">Life Support: <span id="lifeSupport">5</span></p>
     <p class="status">Happiness: <span id="happiness">5</span></p>
   </div>
 
   <div class="section">
-    <button onclick="queueModule('habitat')">Queue Habitat (3 rounds)</button>
+    <button onclick="queueModule('habitat')">Queue Habitat (3 days)</button>
     <button onclick="queueModule('hydroponics')">Queue Hydroponics</button>
     <button onclick="queueModule('recDome')">Queue Rec Dome</button>
     <p>Construction Queue:</p>
@@ -30,12 +31,11 @@
   </div>
 
   <div class="section">
-    <button onclick="nextRound()">Advance Round</button>
     <p id="log"></p>
   </div>
 
   <script>
-    let round = 1;
+    let day = 1;
     let workers = 2;
     let habitats = 0;
     let lifeSupport = 5;
@@ -43,26 +43,31 @@
     let queue = [];
 
     function queueModule(type) {
-      queue.push({ type, time: type === 'habitat' ? 3 : 2 });
+      const time = type === 'habitat' ? 3 : 2;
+      queue.push({ type, time, originalTime: time });
       updateQueue();
     }
 
     function updateQueue() {
       const list = document.getElementById('queue');
       list.innerHTML = '';
-      queue.forEach((item, i) => {
+      queue.forEach(item => {
         const li = document.createElement('li');
-        li.textContent = `${item.type} (${item.time} rounds left)`;
+        li.innerHTML = `
+          ${item.type}
+          <progress value="${item.originalTime - item.time}" max="${item.originalTime}"></progress>
+        `;
         list.appendChild(li);
       });
     }
 
-    function nextRound() {
-      round++;
-      if (round > 5) {
-        document.getElementById('log').textContent = lifeSupport >= 25 ? "Victory! Moonbase is sustainable." : "Collapse! Moonbase failed.";
-        return;
-      }
+    function updateWorkersDisplay() {
+      document.getElementById('workers').textContent = '👨‍🚀'.repeat(workers);
+    }
+
+    function nextDay() {
+      day++;
+      document.getElementById('day').textContent = day;
 
       // Process queue
       queue.forEach(item => item.time--);
@@ -85,21 +90,23 @@
         lifeSupport -= 5;
         happiness -= 2;
         workers = Math.max(1, workers - 1);
-        document.getElementById('log').textContent = "Warning: Habitats under-supported!";
+        document.getElementById('log').textContent = "⚠️ Warning: Habitats under-supported!";
       } else {
         lifeSupport += 5;
         happiness += 1;
-        document.getElementById('log').textContent = "Base stable. Crew thriving.";
+        document.getElementById('log').textContent = "✅ Base stable. Crew thriving.";
       }
 
       // Update UI
-      document.getElementById('round').textContent = round;
-      document.getElementById('workers').textContent = workers;
       document.getElementById('habitats').textContent = habitats;
       document.getElementById('lifeSupport').textContent = lifeSupport;
       document.getElementById('happiness').textContent = happiness;
+      updateWorkersDisplay();
       updateQueue();
     }
+
+    updateWorkersDisplay();
+    setInterval(nextDay, 15000);
   </script>
 </body>
 </html>
