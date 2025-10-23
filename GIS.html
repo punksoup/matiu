@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Galactic Investment Strategy</title>
+  <style>
+    body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
+    .section { margin-bottom: 20px; }
+    button { padding: 8px; margin: 5px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #0f0; padding: 5px; text-align: center; }
+    .log { color: #ff0; }
+  </style>
+</head>
+<body>
+  <h1>🚀 Galactic Investment Strategy</h1>
+
+  <div class="section">
+    <p>Sol: <span id="sol">1</span></p>
+    <p>Credits: <span id="credits">1000</span></p>
+    <p>Protection Level: <span id="protection">0</span></p>
+  </div>
+
+  <div class="section">
+    <h2>📈 Stock Market</h2>
+    <table>
+      <thead>
+        <tr><th>Company</th><th>Price</th><th>Shares</th><th>Actions</th></tr>
+      </thead>
+      <tbody id="stockTable"></tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2>🏠 Real Estate</h2>
+    <button onclick="investRealEstate('Moon Dome')">Buy Moon Dome (200)</button>
+    <button onclick="investRealEstate('Asteroid Farm')">Buy Asteroid Farm (500)</button>
+    <p>Owned: <span id="realEstate"></span></p>
+  </div>
+
+  <div class="section">
+    <h2>📦 Trade Contracts</h2>
+    <button onclick="investContract('Titan Route')">Sign Titan Route (300)</button>
+    <button onclick="investContract('Venus Express')">Sign Venus Express (300)</button>
+    <p>Contracts: <span id="contracts"></span></p>
+  </div>
+
+  <div class="section">
+    <h2>🛡 Security</h2>
+    <button onclick="upgradeSecurity()">Upgrade Protection (100)</button>
+  </div>
+
+  <div class="section">
+    <p class="log" id="log"></p>
+  </div>
+
+  <script>
+    let sol = 1;
+    let credits = 1000;
+    let protectionLevel = 0;
+    let portfolio = {};
+    let realEstate = [];
+    let contracts = [];
+
+    let stocks = {
+      "Lunar Hydroponics": { price: 50 },
+      "Mars Mining Co.": { price: 80 },
+      "Europa Tech": { price: 120 }
+    };
+
+    function updateUI() {
+      document.getElementById('sol').textContent = sol;
+      document.getElementById('credits').textContent = credits;
+      document.getElementById('protection').textContent = protectionLevel;
+
+      const table = document.getElementById('stockTable');
+      table.innerHTML = '';
+      for (let name in stocks) {
+        const stock = stocks[name];
+        const owned = portfolio[name] || 0;
+        table.innerHTML += `
+          <tr>
+            <td>${name}</td>
+            <td>${stock.price}</td>
+            <td>${owned}</td>
+            <td>
+              <button onclick="buy('${name}')">Buy</button>
+              <button onclick="sell('${name}')">Sell</button>
+            </td>
+          </tr>
+        `;
+      }
+
+      document.getElementById('realEstate').textContent = realEstate.join(', ') || 'None';
+      document.getElementById('contracts').textContent = contracts.join(', ') || 'None';
+    }
+
+    function buy(name) {
+      const price = stocks[name].price;
+      if (credits >= price) {
+        credits -= price;
+        portfolio[name] = (portfolio[name] || 0) + 1;
+        log(`Bought 1 share of ${name}`);
+        updateUI();
+      } else {
+        log("Not enough credits.");
+      }
+    }
+
+    function sell(name) {
+      if ((portfolio[name] || 0) > 0) {
+        credits += stocks[name].price;
+        portfolio[name]--;
+        log(`Sold 1 share of ${name}`);
+        updateUI();
+      } else {
+        log("No shares to sell.");
+      }
+    }
+
+    function investRealEstate(type) {
+      const cost = type === 'Moon Dome' ? 200 : 500;
+      if (credits >= cost) {
+        credits -= cost;
+        realEstate.push(type);
+        log(`Invested in ${type}`);
+        updateUI();
+      } else {
+        log("Not enough credits.");
+      }
+    }
+
+    function investContract(route) {
+      const cost = 300;
+      if (credits >= cost) {
+        credits -= cost;
+        contracts.push(route);
+        log(`Signed trade contract for ${route}`);
+        updateUI();
+      } else {
+        log("Not enough credits.");
+      }
+    }
+
+    function upgradeSecurity() {
+      if (credits >= 100) {
+        credits -= 100;
+        protectionLevel++;
+        log("Upgraded protection level.");
+        updateUI();
+      } else {
+        log("Not enough credits.");
+      }
+    }
+
+    function payDividends() {
+      for (let company in portfolio) {
+        const shares = portfolio[company];
+        const dividend = shares * 2;
+        credits += dividend;
+      }
+    }
+
+    function checkForPirates() {
+      const risk = Math.random();
+      if (risk > 0.8 - protectionLevel * 0.1) {
+        const loss = Math.floor(Math.random() * 100);
+        credits = Math.max(0, credits - loss);
+        log(`🚨 Pirate raid! Lost ${loss} credits.`);
+      }
+    }
+
+    function nextSol() {
+      sol++;
+      for (let name in stocks) {
+        let change = Math.floor(Math.random() * 11) - 5;
+        stocks[name].price = Math.max(1, stocks[name].price + change);
+      }
+      payDividends();
+      checkForPirates();
+      log(`Sol ${sol}: Markets updated. Dividends paid.`);
+      updateUI();
+    }
+
+    function log(msg) {
+      document.getElementById('log').textContent = msg;
+    }
+
+    updateUI();
+    setInterval(nextSol, 15000); // 1 sol = 15 seconds
+  </script>
+</body>
+</html>
