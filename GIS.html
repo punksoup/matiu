@@ -2,14 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Galactic Investment Strategy V0.02</title>
+  <title>Galactic Investment Strategy</title>
   <style>
     body { background: #000; color: #0f0; font-family: monospace; padding: 20px; }
     .section { margin-bottom: 20px; }
     button { padding: 8px; margin: 5px; }
-    table { border-collapse: collapse; width: 100%; }
-    th, td { border: 1px solid #0f0; padding: 5px; text-align: center; }
+    table { border-collapse: collapse; width: 100%; font-size: 12px; }
+    th, td { border: 1px solid #0f0; padding: 4px; text-align: center; }
     .log { color: #ff0; }
+    #stockTableContainer { max-height: 600px; overflow-y: auto; border: 1px solid #0f0; }
   </style>
 </head>
 <body>
@@ -23,12 +24,14 @@
 
   <div class="section">
     <h2>📈 Stock Market</h2>
-    <table>
-      <thead>
-        <tr><th>Company</th><th>Trait</th><th>Price</th><th>Shares</th><th>Revenue</th><th>History</th><th>Actions</th></tr>
-      </thead>
-      <tbody id="stockTable"></tbody>
-    </table>
+    <div id="stockTableContainer">
+      <table>
+        <thead>
+          <tr><th>Company</th><th>Trait</th><th>Price</th><th>Shares</th><th>Revenue</th><th>History</th><th>Actions</th></tr>
+        </thead>
+        <tbody id="stockTable"></tbody>
+      </table>
+    </div>
   </div>
 
   <div class="section">
@@ -45,6 +48,7 @@
 
   <div class="section">
     <p class="log" id="log"></p>
+    <p class="log" id="news"></p>
   </div>
 
   <script>
@@ -89,6 +93,25 @@
       return history.slice(-10).map(val => val > 0 ? '+' : val < 0 ? '-' : '.').join('');
     }
 
+    function generateNewsHeadline() {
+      let totalRevenue = 0;
+      let boomCount = 0;
+      let bustCount = 0;
+
+      for (let name in stocks) {
+        const r = stocks[name].revenue;
+        totalRevenue += r;
+        if (r > 10) boomCount++;
+        if (r < -10) bustCount++;
+      }
+
+      if (totalRevenue > 100) return "📢 AI Advisor: Market surging—consider aggressive buys.";
+      if (totalRevenue < -100) return "📢 AI Advisor: Market downturn—consider selling volatile assets.";
+      if (boomCount > bustCount) return "📢 AI Advisor: Tech sectors booming—watch for spikes.";
+      if (bustCount > boomCount) return "📢 AI Advisor: Mining sectors struggling—expect dips.";
+      return "📢 AI Advisor: Mixed signals—diversify your portfolio.";
+    }
+
     function updateUI() {
       document.getElementById('sol').textContent = sol;
       document.getElementById('credits').textContent = credits;
@@ -116,6 +139,7 @@
       }
 
       document.getElementById('contracts').textContent = contracts.join(', ') || 'None';
+      document.getElementById('news').textContent = generateNewsHeadline();
     }
 
     function buy(name) {
@@ -204,7 +228,7 @@
     }
 
     function removeDeadCompanies() {
-      for (let name in Object.keys(stocks)) {
+      for (let name of Object.keys(stocks)) {
         if (stocks[name].price <= 0) {
           delete stocks[name];
           delete portfolio[name];
@@ -234,11 +258,13 @@
       document.getElementById('log').textContent = msg;
     }
 
-    generateCompany();
-    generateCompany();
-    generateCompany();
+    // Initialize game with 21 companies
+    for (let i = 0; i < 21; i++) {
+      generateCompany();
+    }
+
     updateUI();
-    setInterval(nextSol, 3000); // 1 sol = 3 seconds
+    setInterval(nextSol, 15000); // 1 sol = 15 seconds
   </script>
 </body>
 </html>
