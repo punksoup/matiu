@@ -25,17 +25,10 @@
     <h2>📈 Stock Market</h2>
     <table>
       <thead>
-        <tr><th>Company</th><th>Price</th><th>Shares</th><th>Actions</th></tr>
+        <tr><th>Company</th><th>Trait</th><th>Price</th><th>Shares</th><th>Revenue</th><th>History</th><th>Actions</th></tr>
       </thead>
       <tbody id="stockTable"></tbody>
     </table>
-  </div>
-
-  <div class="section">
-    <h2>🏠 Real Estate</h2>
-    <button onclick="investRealEstate('Moon Dome')">Buy Moon Dome (200)</button>
-    <button onclick="investRealEstate('Asteroid Farm')">Buy Asteroid Farm (500)</button>
-    <p>Owned: <span id="realEstate"></span></p>
   </div>
 
   <div class="section">
@@ -59,14 +52,42 @@
     let credits = 1000;
     let protectionLevel = 0;
     let portfolio = {};
-    let realEstate = [];
     let contracts = [];
+    let stocks = {};
+    let nextCompanySol = getNextCompanySol();
 
-    let stocks = {
-      "Lunar Hydroponics": { price: 50 },
-      "Mars Mining Co.": { price: 80 },
-      "Europa Tech": { price: 120 }
-    };
+    function getNextCompanySol() {
+      return sol + Math.floor(Math.random() * 7) + 6;
+    }
+
+    function randomTrait() {
+      const traits = ['Stable', 'Volatile', 'Boom/Bust'];
+      return traits[Math.floor(Math.random() * traits.length)];
+    }
+
+    function generateCompany() {
+      const prefixes = ["Nova", "Quantum", "Solar", "Lunar", "Astro", "Nebula", "Ion"];
+      const suffixes = ["Tech", "Mining", "Logistics", "Dynamics", "Systems", "Industries"];
+      const name = `${prefixes[Math.floor(Math.random() * prefixes.length)]} ${suffixes[Math.floor(Math.random() * suffixes.length)]}`;
+      stocks[name] = {
+        price: Math.floor(Math.random() * 100) + 50,
+        revenue: 0,
+        history: [],
+        trait: randomTrait()
+      };
+      log(`🆕 New company listed: ${name}`);
+    }
+
+    function getRevenueByTrait(trait) {
+      if (trait === 'Stable') return Math.floor(Math.random() * 7) - 3;
+      if (trait === 'Volatile') return Math.floor(Math.random() * 21) - 10;
+      if (trait === 'Boom/Bust') return Math.floor(Math.random() * 41) - 20;
+      return 0;
+    }
+
+    function renderHistoryGraph(history) {
+      return history.slice(-10).map(val => val > 0 ? '+' : val < 0 ? '-' : '.').join('');
+    }
 
     function updateUI() {
       document.getElementById('sol').textContent = sol;
@@ -81,8 +102,11 @@
         table.innerHTML += `
           <tr>
             <td>${name}</td>
+            <td>${stock.trait}</td>
             <td>${stock.price}</td>
             <td>${owned}</td>
+            <td>${stock.revenue}</td>
+            <td>${renderHistoryGraph(stock.history)}</td>
             <td>
               <button onclick="buy('${name}')">Buy</button>
               <button onclick="sell('${name}')">Sell</button>
@@ -91,7 +115,6 @@
         `;
       }
 
-      document.getElementById('realEstate').textContent = realEstate.join(', ') || 'None';
       document.getElementById('contracts').textContent = contracts.join(', ') || 'None';
     }
 
@@ -115,18 +138,6 @@
         updateUI();
       } else {
         log("No shares to sell.");
-      }
-    }
-
-    function investRealEstate(type) {
-      const cost = type === 'Moon Dome' ? 200 : 500;
-      if (credits >= cost) {
-        credits -= cost;
-        realEstate.push(type);
-        log(`Invested in ${type}`);
-        updateUI();
-      } else {
-        log("Not enough credits.");
       }
     }
 
@@ -161,6 +172,18 @@
       }
     }
 
+    function payoutContracts() {
+      let totalRevenue = 0;
+      for (let name in stocks) totalRevenue += stocks[name].revenue;
+
+      contracts.forEach(route => {
+        let payout = 10;
+        if (totalRevenue > 0) payout += 5;
+        if (totalRevenue < 0) payout -= 5;
+        credits += payout;
+      });
+    }
+
     function checkForPirates() {
       const risk = Math.random();
       if (risk > 0.8 - protectionLevel * 0.1) {
@@ -170,15 +193,40 @@
       }
     }
 
+    function updateCompanyRevenue() {
+      for (let name in stocks) {
+        const stock = stocks[name];
+        const revenue = getRevenueByTrait(stock.trait);
+        stock.revenue = revenue;
+        stock.price += revenue;
+        stock.history.push(revenue);
+      }
+    }
+
+    function removeDeadCompanies() {
+      for (let name in Object.keys(stocks)) {
+        if (stocks[name].price <= 0) {
+          delete stocks[name];
+          delete portfolio[name];
+          log(`❌ ${name} collapsed and was delisted.`);
+        }
+      }
+    }
+
     function nextSol() {
       sol++;
-      for (let name in stocks) {
-        let change = Math.floor(Math.random() * 11) - 5;
-        stocks[name].price = Math.max(1, stocks[name].price + change);
-      }
+      updateCompanyRevenue();
+      removeDeadCompanies();
       payDividends();
+      payoutContracts();
       checkForPirates();
-      log(`Sol ${sol}: Markets updated. Dividends paid.`);
+
+      if (sol >= nextCompanySol) {
+        generateCompany();
+        nextCompanySol = getNextCompanySol();
+      }
+
+      log(`Sol ${sol}: Revenue updated. Time the market wisely.`);
       updateUI();
     }
 
@@ -186,6 +234,9 @@
       document.getElementById('log').textContent = msg;
     }
 
+    generateCompany();
+    generateCompany();
+    generateCompany();
     updateUI();
     setInterval(nextSol, 15000); // 1 sol = 15 seconds
   </script>
