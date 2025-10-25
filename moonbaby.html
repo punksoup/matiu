@@ -2,111 +2,231 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Moonbase Idle Game</title>
+  <title>Dynasty of Dust</title>
   <style>
-    body { font-family: sans-serif; background: #111; color: #eee; padding: 20px; }
-    .section { margin-bottom: 20px; }
-    button { padding: 10px; margin: 5px; }
-    .status { font-weight: bold; }
-    progress { width: 150px; margin-left: 10px; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4e9d8;
+      color: #3e2f1c;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      font-family: 'Papyrus', fantasy;
+    }
+    .panel {
+      border: 2px solid #a67c52;
+      padding: 10px;
+      margin-bottom: 20px;
+      background-color: #fff8e1;
+    }
+    button {
+      margin: 5px;
+      padding: 10px;
+      background-color: #d4af37;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c19a2b;
+    }
   </style>
 </head>
 <body>
-  <h1>🌕 Moonbase</h1>
+  <h1>𒀭 Dynasty of Dust</h1>
 
-  <div class="section">
-    <p class="status">Day: <span id="day">1</span></p>
-    <p class="status">Workers: <span id="workers">👨‍🚀👨‍🚀</span></p>
-    <p class="status">Habitats: <span id="habitats">0</span></p>
-    <p class="status">Life Support: <span id="lifeSupport">5</span></p>
-    <p class="status">Happiness: <span id="happiness">5</span></p>
+  <div class="panel">
+    <h2>Ruler Status</h2>
+    <p>Age: <span id="age">30</span></p>
+    <p>Years Ruled: <span id="years">0</span></p>
   </div>
 
-  <div class="section">
-    <button onclick="queueModule('habitat')">Queue Habitat (3 days)</button>
-    <button onclick="queueModule('hydroponics')">Queue Hydroponics</button>
-    <button onclick="queueModule('recDome')">Queue Rec Dome</button>
-    <p>Construction Queue:</p>
-    <ul id="queue"></ul>
+  <div class="panel">
+    <h2>Faction Loyalty</h2>
+    <p>Priests: <span id="priests">60</span></p>
+    <p>Nobles: <span id="nobles">60</span></p>
+    <p>Merchants: <span id="merchants">60</span></p>
+    <p>Commoners: <span id="commoners">60</span></p>
   </div>
 
-  <div class="section">
-    <p id="log"></p>
+  <div class="panel">
+    <h2>Resources</h2>
+    <p>Grain: <span id="grain">100</span></p>
+    <p>Clay: <span id="clay">50</span></p>
+    <p>Water: <span id="water">200</span></p>
+  </div>
+
+  <div class="panel">
+    <h2>Population</h2>
+    <p>Unassigned Pops: <span id="unassigned">5</span></p>
+    <p>Farmers: <span id="farmers">3</span></p>
+    <p>Builders: <span id="builders">2</span></p>
+    <p>Water Carriers: <span id="carriers">0</span></p>
+  </div>
+
+  <div class="panel">
+    <h2>Assign Workers</h2>
+    <button onclick="assign('farmers')">+ Farmer</button>
+    <button onclick="assign('builders')">+ Builder</button>
+    <button onclick="assign('carriers')">+ Water Carrier</button>
+    <button onclick="unassign('farmers')">− Farmer</button>
+    <button onclick="unassign('builders')">− Builder</button>
+    <button onclick="unassign('carriers')">− Water Carrier</button>
+  </div>
+
+  <div class="panel">
+    <h2>Daily Tasks</h2>
+    <button onclick="dailyWork()">Run Daily Tasks</button>
+  </div>
+
+  <div class="panel">
+    <h2>Event</h2>
+    <p id="eventText">Click "Next Year" to begin your reign.</p>
+    <div id="choices"></div>
+    <button onclick="nextYear()">Next Year</button>
   </div>
 
   <script>
-    let day = 1;
-    let workers = 2;
-    let habitats = 0;
-    let lifeSupport = 5;
-    let happiness = 5;
-    let queue = [];
+    let age = 30;
+    let years = 0;
+    let grain = 100;
+    let clay = 50;
+    let water = 200;
+    let farmers = 3;
+    let builders = 2;
+    let carriers = 0;
+    let unassigned = 5;
 
-    function queueModule(type) {
-      const time = type === 'habitat' ? 3 : 2;
-      queue.push({ type, time, originalTime: time });
-      updateQueue();
-    }
+    let factions = {
+      priests: 60,
+      nobles: 60,
+      merchants: 60,
+      commoners: 60
+    };
 
-    function updateQueue() {
-      const list = document.getElementById('queue');
-      list.innerHTML = '';
-      queue.forEach(item => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-          ${item.type}
-          <progress value="${item.originalTime - item.time}" max="${item.originalTime}"></progress>
-        `;
-        list.appendChild(li);
-      });
-    }
-
-    function updateWorkersDisplay() {
-      document.getElementById('workers').textContent = '👨‍🚀'.repeat(workers);
-    }
-
-    function nextDay() {
-      day++;
-      document.getElementById('day').textContent = day;
-
-      // Process queue
-      queue.forEach(item => item.time--);
-      const completed = queue.filter(item => item.time <= 0);
-      queue = queue.filter(item => item.time > 0);
-
-      completed.forEach(item => {
-        if (item.type === 'habitat') {
-          habitats++;
-          workers++;
-        } else if (item.type === 'hydroponics') {
-          lifeSupport += 5;
-        } else if (item.type === 'recDome') {
-          happiness += 2;
-        }
-      });
-
-      // Decay if unsupported
-      if (habitats > 0 && (lifeSupport < habitats * 5 || happiness < habitats * 2)) {
-        lifeSupport -= 5;
-        happiness -= 2;
-        workers = Math.max(1, workers - 1);
-        document.getElementById('log').textContent = "⚠️ Warning: Habitats under-supported!";
-      } else {
-        lifeSupport += 5;
-        happiness += 1;
-        document.getElementById('log').textContent = "✅ Base stable. Crew thriving.";
+    const events = [
+      {
+        text: "A solar eclipse frightens the people. The priests demand a week of fasting.",
+        choices: [
+          { text: "Approve fasting", effects: { priests: +10, merchants: -5 } },
+          { text: "Deny fasting", effects: { priests: -10, commoners: +5 } }
+        ]
+      },
+      {
+        text: "A merchant caravan offers tribute for trade rights.",
+        choices: [
+          { text: "Accept tribute", effects: { merchants: +10, nobles: -5 } },
+          { text: "Refuse offer", effects: { merchants: -10, priests: +5 } }
+        ]
+      },
+      {
+        text: "A noble family demands land for their loyalty.",
+        choices: [
+          { text: "Grant land", effects: { nobles: +10, commoners: -10 } },
+          { text: "Refuse request", effects: { nobles: -10, priests: +5 } }
+        ]
       }
+    ];
 
-      // Update UI
-      document.getElementById('habitats').textContent = habitats;
-      document.getElementById('lifeSupport').textContent = lifeSupport;
-      document.getElementById('happiness').textContent = happiness;
-      updateWorkersDisplay();
-      updateQueue();
+    function updateUI() {
+      document.getElementById('age').textContent = age;
+      document.getElementById('years').textContent = years;
+      document.getElementById('grain').textContent = grain;
+      document.getElementById('clay').textContent = clay;
+      document.getElementById('water').textContent = water;
+      document.getElementById('farmers').textContent = farmers;
+      document.getElementById('builders').textContent = builders;
+      document.getElementById('carriers').textContent = carriers;
+      document.getElementById('unassigned').textContent = unassigned;
+      for (let key in factions) {
+        document.getElementById(key).textContent = factions[key];
+      }
     }
 
-    updateWorkersDisplay();
-    setInterval(nextDay, 15000);
+    function assign(role) {
+      if (unassigned > 0) {
+        window[role]++;
+        unassigned--;
+        updateUI();
+      }
+    }
+
+    function unassign(role) {
+      if (window[role] > 0) {
+        window[role]--;
+        unassigned++;
+        updateUI();
+      }
+    }
+
+    function dailyWork() {
+      grain += farmers * 10;
+      clay += builders * 5;
+      water += carriers * 15;
+      updateUI();
+      alert("Daily tasks complete! Resources gathered.");
+    }
+
+    function nextYear() {
+      age++;
+      years++;
+      const event = events[Math.floor(Math.random() * events.length)];
+      document.getElementById('eventText').textContent = event.text;
+      const choicesDiv = document.getElementById('choices');
+      choicesDiv.innerHTML = '';
+      event.choices.forEach((choice) => {
+        const btn = document.createElement('button');
+        btn.textContent = choice.text;
+        btn.onclick = () => applyChoice(choice.effects);
+        choicesDiv.appendChild(btn);
+      });
+      updateUI();
+    }
+
+    function applyChoice(effects) {
+      for (let key in effects) {
+        factions[key] += effects[key];
+        if (factions[key] < 0) factions[key] = 0;
+        if (factions[key] > 100) factions[key] = 100;
+      }
+      checkDeposed();
+      document.getElementById('choices').innerHTML = '';
+      document.getElementById('eventText').textContent = "Decision made. Click 'Next Year' to continue.";
+      updateUI();
+    }
+
+    function checkDeposed() {
+      for (let key in factions) {
+        if (factions[key] <= 10) {
+          alert(`You have been deposed by the ${key}. Your dynasty ends.`);
+          resetGame();
+          break;
+        }
+      }
+    }
+
+    function resetGame() {
+      age = 30;
+      years = 0;
+      grain = 100;
+      clay = 50;
+      water = 200;
+      farmers = 3;
+      builders = 2;
+      carriers = 0;
+      unassigned = 5;
+      factions = {
+        priests: 60,
+        nobles: 60,
+        merchants: 60,
+        commoners: 60
+      };
+      document.getElementById('eventText').textContent = "Click 'Next Year' to begin your reign.";
+      document.getElementById('choices').innerHTML = '';
+      updateUI();
+    }
+
+    updateUI();
   </script>
 </body>
 </html>
