@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Hex Adventure Sandbox Generator</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background:#111; color:#eee; margin:0; padding:0; }
+    header { background:#222; padding:1rem 2rem; border-bottom:1px solid #333; }
+    h1 { margin:0; font-size:1.6rem; }
+    main { padding:1rem 2rem 3rem; max-width:1100px; margin:auto; }
+    button { background:#4b8bff; color:#fff; border:none; padding:0.6rem 1.2rem; border-radius:4px; cursor:pointer; font-size:1rem; }
+    button:hover { background:#3567c7; }
+    .section { margin-top:1.5rem; padding:1rem; border-radius:6px; background:#181818; border:1px solid #333; }
+    .section h2 { margin-top:0; font-size:1.2rem; }
+    .sub { margin-top:0.5rem; margin-bottom:0.3rem; font-weight:bold; color:#ffd27f; }
+    pre { white-space:pre-wrap; word-wrap:break-word; font-family:inherit; }
+    .small { font-size:0.9rem; color:#aaa; }
+    .two-col { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    @media (max-width: 800px) { .two-col { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Hex Adventure Sandbox Generator by matiu</h1>
+  <p class="small">Click “Generate Hex” to create an adventure site cluster, factions, settlement, McGuffin, and prompts.</p>
+</header>
+<main>
+  <button onclick="generateHex()">Generate Hex</button>
+
+  <div id="output-hex" class="section"></div>
+  <div id="output-sites" class="section"></div>
+  <div id="output-settlement" class="section"></div>
+  <div id="output-magic" class="section"></div>
+  <div id="output-character" class="section"></div>
+</main>
+
+<script>
+  // --- Utility ---
+  function rInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+  function pick(arr) { return arr[rInt(0, arr.length - 1)]; }
+
+  // --- Tables ---
+
+  const biomes = [
+    "Rock formations", "Rolling dunes", "Oasis", "Pink sands desert", "Purple tundra",
+    "Endless marsh where time slows", "Acidic jungle", "Breathable lake",
+    "Unbearably hot badlands", "Subterranean network of tunnels and canals",
+    "Dreary gloom forest", "Ruined manorhouse grounds", "Sunny hills",
+    "Tower made from animal skulls (dominates the horizon)", "Constant storms coast",
+    "Barrenlands", "Towering mountains", "Misty & rainy valley", "Floating island cluster",
+    "High plateau"
+  ];
+
+  const siteNature = [
+    {id:1, tone:"Tranquil", type:"Library"},
+    {id:2, tone:"Peculiar", type:"Castle"},
+    {id:3, tone:"Forgotten", type:"Tower"},
+    {id:4, tone:"Mundane", type:"Manor"},
+    {id:5, tone:"Infamous", type:"Gardens"},
+    {id:6, tone:"Squalored", type:"Bazaar/Marketplace"},
+    {id:7, tone:"Forsaken", type:"Tavern"},
+    {id:8, tone:"Ruined", type:"Sanctuary"},
+    {id:9, tone:"Sacred", type:"Battlefield"},
+    {id:10, tone:"Austere", type:"Folly"},
+    {id:11, tone:"Famous", type:"Temple"},
+    {id:12, tone:"Nightmarish", type:"Guildhouse"}
+  ];
+
+  const settlementTypes = [
+    "Tiny settlement", "Small village", "Township", "Mine", "City", "Forge-town", "Trading post"
+  ];
+
+  const exports = [
+    "Amberstone", "Gold", "Jewels", "Fungus", "Mercenaries", "Weaponry",
+    "Tools", "Carpets", "Books", "Fine Clothing", "Silk", "Something stranger and unique"
+  ];
+
+  const populaceTraits = [
+    "Poor and destitute", "Merchants and traders", "Artisans", "Farmers",
+    "Wary of outsiders", "Scholars", "Monsters in disguise or openly present",
+    "Zealots", "Nobility", "Dwarves", "Untrustworthy", "Sanguine and optimistic"
+  ];
+
+  const powerEntities = [
+    "A magic user", "The merchants guild", "A cult to an unknown power",
+    "A fallible fool of a Mayor", "A highborn but corrupt family",
+    "Mercenaries", "A tyrannical noble", "A religious leader",
+    "The farming guild", "Wealthy aristocrats",
+    "A vacuum in power with rival factions", "Apathetic technocrats"
+  ];
+
+  const randomEvents = [
+    "Something larger looms just around the bend, humming a hypnotic tune.",
+    "It holds something shiny in its mouth.",
+    "It is actually a buried troll, whispering in its sleep.",
+    "Her teeth are fanged, like daggers.",
+    "A robed woman is tending to a wounded animal.",
+    "Hushed voices call out to one another.",
+    "Dozens of rootlings have set up a market here.",
+    "A dense thicket of thorns, nearly impassable.",
+    "A tree acting as a makeshift bridge over a babbling stream.",
+    "Wild berries grow here in abundance.",
+    "Bees swarm protectively around a tree.",
+    "Shadowy figures dart between the trees.",
+    "A tiny hovel is nestled in the roots of a great tree.",
+    "A massive boulder blocks the path ahead.",
+    "A windless glade, unnaturally still."
+  ];
+
+  const mcguffinTypes = [
+    "Amulet or ring", "Item of clothing", "Book", "Artefact", "Automaton", "Homunculus"
+  ];
+
+  const mcguffinReasons = [
+    "Manipulate Fate", "Summon a being", "Destroy something vital", "Banish a threat",
+    "Find a lost place or person", "Conjure Matter", "Conjure Elements",
+    "Conjure Life", "Conjure Time", "Control Mind", "Control Life", "Control Time"
+  ];
+
+  const clothingTypes = ["Gown", "Shoes", "Dinnerjacket", "Eyeglass", "Cloak", "Hat"];
+
+  const alignments = {
+    Quill: "Intellect, magic, scholars",
+    Spade: "Labourers, stoic, loyal, honest common folk",
+    Dagger: "Combat prowess, nefarious, cunning, strong-willed and defiant"
+  };
+
+  const pastTable = [
+    {range:"11", past:"Shopkeeper", align:"Quill", keepsake:"A poultice of unknown origin", extra:"Bedroll"},
+    {range:"12", past:"Gardener", align:"Spade", keepsake:"A faithful trowel", extra:"Quiver of ammunition"},
+    {range:"13", past:"Fungus Studier", align:"Quill", keepsake:"Magnifying glass", extra:"Torch"},
+    {range:"14", past:"Scribe", align:"Quill", keepsake:"Favourite book", extra:"Waterskin"},
+    {range:"15", past:"Minstrel", align:"Quill", keepsake:"Panflute", extra:"Fingerless leather gloves"},
+    {range:"16", past:"Miner", align:"Spade", keepsake:"Talking canary or gnome follower", extra:"Flask"},
+    {range:"21", past:"Healer", align:"Quill", keepsake:"Herbal medicine kit", extra:"Flint & steel"},
+    {range:"22", past:"Trapper", align:"Quill", keepsake:"Hemp rope", extra:"Hammer"},
+    {range:"23", past:"Tea farmer", align:"Spade", keepsake:"A chipped ceramic teapot", extra:"Hooded cloak"},
+    {range:"24", past:"Veteran", align:"Dagger", keepsake:"Cursed sword", extra:"Lamp oil"},
+    {range:"25", past:"Gravedigger", align:"Spade", keepsake:"Worn necklace", extra:"Lantern"},
+    {range:"26", past:"Poet", align:"Quill", keepsake:"Journal", extra:"Leather armour"},
+    {range:"31", past:"Forester", align:"Spade", keepsake:"Hatchet", extra:"Manacles"},
+    {range:"32", past:"Gambler", align:"Dagger", keepsake:"Bone dice", extra:"Melee weapon"},
+    {range:"33", past:"Vegetable farmer", align:"Spade", keepsake:"Mandrake soup recipe", extra:"Piece of armour"},
+    {range:"34", past:"Cobbler", align:"Spade", keepsake:"Sandals from ancient elm roots", extra:"Rations (4 days)"},
+    {range:"35", past:"Diviner", align:"Quill", keepsake:"Bejewelled wand", extra:"Rope (hemp)"},
+    {range:"36", past:"Trader", align:"Quill", keepsake:"Pocketbook", extra:"Small shield"},
+    {range:"41", past:"Farmer", align:"Spade", keepsake:"Muckrake", extra:"Tinderbox"},
+    {range:"42", past:"Forester", align:"Spade", keepsake:"Bushcraft knife", extra:"Bedroll"},
+    {range:"43", past:"Ratcatcher", align:"Dagger", keepsake:"Silver brooch with family name", extra:"Quiver of ammunition"},
+    {range:"44", past:"Wormfarmer", align:"Spade", keepsake:"Blackthorn staff", extra:"Torch"},
+    {range:"45", past:"Herbalist", align:"Quill", keepsake:"Mortar and pestle", extra:"Waterskin"},
+    {range:"46", past:"Smuggler", align:"Dagger", keepsake:"Blank spell scroll (level 2)", extra:"Flask"},
+    {range:"51", past:"Mercenary", align:"Dagger", keepsake:"Ranged weapon", extra:"Flint & steel"},
+    {range:"52", past:"Wayfarer", align:"Quill", keepsake:"Lantern", extra:"Net"},
+    {range:"53", past:"Grifter", align:"Dagger", keepsake:"Melee weapon", extra:"Tinderbox"},
+    {range:"54", past:"Candlemaker", align:"Quill", keepsake:"Hogororoth's magic wand", extra:"Lamp oil"},
+    {range:"55", past:"Vagabond", align:"Dagger", keepsake:"Hooded cloak", extra:"Rations (4 days)"},
+    {range:"56", past:"Filcher", align:"Dagger", keepsake:"An incriminating letter", extra:"Rope (hemp)"},
+    {range:"61", past:"Carpenter", align:"Spade", keepsake:"Gythrani hammer", extra:"Small shield"},
+    {range:"62", past:"Clergy", align:"Dagger", keepsake:"Spider-silk robes", extra:"Leather armour"},
+    {range:"63", past:"Pitkeeper", align:"Dagger", keepsake:"Piece of armour", extra:"—"},
+    {range:"64", past:"Sailor", align:"Spade", keepsake:"Dried and salted (slightly rotten) fish", extra:"—"},
+    {range:"65", past:"Ranger", align:"Spade", keepsake:"Ranged weapon", extra:"—"},
+    {range:"66", past:"Town guard", align:"Dagger", keepsake:"Manacles", extra:"—"}
+  ];
+
+  const traits = ["Sarcastic", "Humble", "Loyal", "Zealous", "Stubborn", "Stoic"];
+  const races = ["Human", "Dwarf", "Goblin", "Troll", "Fey", "Mixed"];
+  const classes = ["Fighter", "Wizard", "Scoundrel", "Scholar", "Partisan", "Battlemage"];
+  const ages = ["16–25", "26–35", "36–45", "46–55", "56–65", "66–100"];
+
+  // --- Name helper ---
+  const syllables = ["Mir", "Hav", "Tor", "Gly", "Ran", "Vel", "Dus", "Kar", "Thal", "Ost", "Fen", "Mar", "Ith", "Vor", "Quen"];
+  function makeName(suffix) {
+    const s1 = pick(syllables);
+    const s2 = pick(syllables);
+    return (s1 + s2 + (suffix || "")).replace(/([a-z])([A-Z])/g, "$1 $2");
+  }
+
+  // --- Site generator ---
+  function generateSite(index) {
+    const nature = pick(siteNature);
+    const theme = `${nature.tone} ${nature.type.toLowerCase()} shaped by ${pick(biomes).toLowerCase()}.`;
+
+    const factions = [
+      `Faction A: ${pick(["Order of the", "Brotherhood of the", "Circle of the", "Company of the", "Cult of the"])} ${pick(["Sunken Quill", "Cracked Tower", "Silent Bell", "Bleached Skull", "Shifting Dunes", "Still Marsh"])}`,
+      `Faction B: ${pick(["Guild of", "League of", "Band of", "Cabal of", "Clan of"])} ${pick(["Leech-Harvesters", "Storm-Riders", "Bone-Merchants", "Time-Lost Pilgrims", "Root-Speakers", "Ash-Walkers"])}`
+    ];
+
+    const mapRooms = [
+      "Entrance / Approach",
+      "Central Hall or Heart of the Site",
+      "Hidden or Secret Area",
+      "Elevated or Sunken Zone",
+      "Ritual / Social / Market Space",
+      "Collapsed, Ruined, or Dangerous Section"
+    ];
+
+    const populatedRooms = mapRooms.map(r => {
+      const twist = pick([
+        "haunted by echoes of the past",
+        "occupied by a minor faction splinter",
+        "guarded by a strange environmental hazard",
+        "marked with runes hinting at the site's history",
+        "used as a temporary camp by travellers",
+        "partially claimed by encroaching wilderness"
+      ]);
+      return `${r}: ${twist}.`;
+    });
+
+    const encounters = [
+      "Common: A patrol, worker group, or casual worshippers going about their business.",
+      "Common: A negotiation or argument between minor NPCs from opposing factions.",
+      "Common: Environmental challenge (unstable ground, strange weather, minor hazard).",
+      "Uncommon: A key NPC from one faction seeking help or leverage.",
+      "Uncommon: A relic or clue that reveals a hidden agenda or secret route.",
+      "Hazardous: A direct clash between factions, a summoned creature, or a dangerous trap."
+    ];
+
+    return {
+      title: `Adventure Site ${index}: ${nature.tone} ${nature.type}`,
+      nature,
+      theme,
+      factions,
+      populatedRooms,
+      encounters
+    };
+  }
+
+  // --- Settlement generator ---
+  function generateSettlement() {
+    const type = pick(settlementTypes);
+    const name = makeName(type.includes("City") ? "" : "");
+    const exp = pick(exports);
+    const popTraits = [];
+    const rolls = rInt(2,4);
+    for (let i=0;i<rolls;i++) {
+      const t = pick(populaceTraits);
+      if (!popTraits.includes(t)) popTraits.push(t);
+    }
+    const power = pick(powerEntities);
+    let rival = pick(powerEntities);
+    while (rival === power) rival = pick(powerEntities);
+
+    const notable = [
+      `${pick(["Old", "Young", "Scarred", "Soft-spoken", "One-eyed"])} ${makeName("")}, a local figure tied to ${power.toLowerCase()}.`,
+      `${pick(["Captain", "High Priest", "Guildmaster", "Warden"])} ${makeName("")}, representing ${rival.toLowerCase()}.`,
+      `A mysterious traveller known only as "${pick(["The Lantern", "The Mask", "The Crow", "The Root", "The Stranger"])}".`,
+      `A group called "${pick(["The Mire-Mothers", "The Brass Hands", "The Silent Choir", "The Red Scrip", "The Stone Circle"])}".`
+    ];
+
+    return {
+      type,
+      name,
+      export: exp,
+      populace: popTraits,
+      power,
+      rival,
+      notable
+    };
+  }
+
+  // --- McGuffin generator ---
+  function generateMcGuffin() {
+    const type = pick(mcguffinTypes);
+    let detail = "";
+    if (type === "Item of clothing") detail = ` (${pick(clothingTypes)})`;
+    const reason = pick(mcguffinReasons);
+    const name = `${pick(["The", "Old", "Broken", "Gleaming", "Whispering", "Forgotten"])} ${pick(["Hourglass", "Crown", "Lens", "Mantle", "Key", "Thread", "Mask"])}${detail}`;
+    return {
+      name,
+      type: type + detail,
+      reason
+    };
+  }
+
+  // --- Magic debt snippet ---
+  function magicDebtSnippet() {
+    return [
+      "Debt to Magic: Every spell cast costs more than energy—aging the caster, eroding memories, or binding them to mystical debts.",
+      "Spell Balance: Each spell has a rating from 1–6. Roll 1d6 when casting:",
+      "• Roll exactly the spell's number: spell is in balance, no harm.",
+      "• Roll over: spell succeeds, but gain a Bane.",
+      "• Roll under: spell fails.",
+      "Banes by Level:",
+      "1: A minor mishap occurs.",
+      "2: Lose a random item.",
+      "3: Gain a small demonic shadow that follows you until banished.",
+      "4: Gain the condition Melancholy.",
+      "5: Lose 1 Resolve permanently.",
+      "6: You create an unstable portal that unleashes a powerful demon into the mortal realm.",
+      "Domains: Wind, Water, Earth, Star, Moon, Chaos, Elemental/Nature.",
+      "Core spell ideas: Protect, Change, Heal, Destroy, Curse, Discover."
+    ].join("\n");
+  }
+
+  // --- Character generator (Past / Alignment / Keepsake) ---
+  function generateCharacter() {
+    const t = pick(traits);
+    const r = pick(races);
+    const c = pick(classes);
+    const a = pick(ages);
+
+    const d1 = rInt(1,6);
+    const d2 = rInt(1,6);
+    const key = `${d1}${d2}`;
+    const pastRow = pastTable.find(p => p.range === key) || pick(pastTable);
+
+    const alignDesc = alignments[pastRow.align] || "";
+
+    return {
+      trait: t,
+      race: r,
+      class: c,
+      age: a,
+      past: pastRow.past,
+      alignment: `${pastRow.align} (${alignDesc})`,
+      keepsake: pastRow.keepsake,
+      extra: pastRow.extra
+    };
+  }
+
+  // --- Big bad & patron/rival ---
+  function generateBigBadAndFactions() {
+    const bigBad = `${pick(["The Marsh-Spirit of the Slowed Hour", "The Sun-Turned Colossus", "The Bone Tower Warden", "The Storm-Hearted Dragon", "The Guildmaster of Nightmares", "The Time-Locked King"])}`;
+    const factions = [
+      `Faction 1: ${pick(["Chrono-Ascetics", "Leech-Harvesters Guild", "Reflection-Thieves", "Bog-Witches of Silt-Row", "Order of the Pink Sands", "Tower-Bound Sentinels"])}`,
+      `Faction 2: ${pick(["Mercenary Company of the Purple Tundra", "Caravan of the Rolling Dunes", "Cult of the Breathable Lake", "Brotherhood of the Subterranean Canals", "Storm-Bound Navigators", "The Root-Speakers"])}`,
+      `Faction 3: ${pick(["The City Watch", "The Hidden Scholars", "The Masked Traders", "The Elemental Cabal", "The Demon-Binders", "The Silent Choir"])}`,
+    ];
+
+    const patron = `${pick(["Sister", "Brother", "Captain", "Magister", "Seer", "Warden"])} ${makeName("")}, who believes the party can shift the balance between factions.`;
+    const rival = `${pick(["Garrik", "Veyla", "Thorn", "Ishra", "Keld", "Morrin"])} ${pick(["the Leech-King", "the Sand-Baron", "the Bone-Merchant", "the Storm-Broker", "the Guild-Favored", "the Demon-Touched"])}, who sees the party as a threat or tool.`;
+
+    return { bigBad, factions, patron, rival };
+  }
+
+  // --- Hex generator ---
+  function generateHex() {
+    const biome = pick(biomes);
+    const numSitesRoll = rInt(1,6);
+    let numSites = 1;
+    if (numSitesRoll >= 4 && numSitesRoll <= 5) numSites = 2;
+    if (numSitesRoll === 6) numSites = 3;
+
+    const sites = [];
+    for (let i=1;i<=numSites;i++) sites.push(generateSite(i));
+
+    const settlement = generateSettlement();
+    const mcguffin = generateMcGuffin();
+    const magicText = magicDebtSnippet();
+    const charGen = generateCharacter();
+    const big = generateBigBadAndFactions();
+    const event = pick(randomEvents);
+
+    // Hex summary
+    const hexDiv = document.getElementById("output-hex");
+    hexDiv.innerHTML = `
+      <h2>Hex Overview</h2>
+      <p><strong>Biome / Terrain:</strong> ${biome}</p>
+      <p><strong>Number of Adventure Sites (1d6=${numSitesRoll}):</strong> ${numSites}</p>
+      <p><strong>Big Bad of this Region:</strong> ${big.bigBad}</p>
+      <p><strong>Key Factions in the Hex:</strong><br>
+        ${big.factions.map(f => "- " + f).join("<br>")}
+      </p>
+      <p><strong>Party's Patron:</strong> ${big.patron}<br>
+         <strong>Party's Rival:</strong> ${big.rival}</p>
+      <p><strong>Random Event Hook:</strong> ${event}</p>
+    `;
+
+    // Sites
+    const sitesDiv = document.getElementById("output-sites");
+    let sitesHTML = "<h2>Adventure Sites in this Hex</h2>";
+    sites.forEach(s => {
+      sitesHTML += `
+        <div class="section" style="background:#141414; border-color:#444; margin-top:1rem;">
+          <div class="sub">${s.title}</div>
+          <p><strong>Nature:</strong> ${s.nature.tone} ${s.nature.type}</p>
+          <p><strong>Theme:</strong> ${s.theme}</p>
+          <p><strong>Factions & Goals (prompt):</strong><br>
+            ${s.factions.join("<br>")}
+          </p>
+          <p><strong>Map / Rooms (prompts):</strong><br>
+            ${s.populatedRooms.map(r => "- " + r).join("<br>")}
+          </p>
+          <p><strong>Encounter Table (d6):</strong><br>
+            ${s.encounters.map((e,i) => (i+1) + ". " + e).join("<br>")}
+          </p>
+        </div>
+      `;
+    });
+    sitesDiv.innerHTML = sitesHTML;
+
+    // Settlement
+    const setDiv = document.getElementById("output-settlement");
+    setDiv.innerHTML = `
+      <h2>Settlement Generator</h2>
+      <p><strong>Settlement Type:</strong> ${settlement.type}</p>
+      <p><strong>City / Settlement Name:</strong> ${settlement.name}</p>
+      <p><strong>Major Export (2d6):</strong> ${settlement.export}</p>
+      <p><strong>Populace Fabric:</strong><br>
+        ${settlement.populace.map(p => "- " + p).join("<br>")}
+      </p>
+      <p><strong>Most Powerful Entity:</strong> ${settlement.power}<br>
+         <strong>Main Rival:</strong> ${settlement.rival}</p>
+      <p><strong>Notable Factions / Characters:</strong><br>
+        ${settlement.notable.map((n,i) => (i+1) + ". " + n).join("<br>")}
+      </p>
+    `;
+
+    // Magic & McGuffin
+    const magicDiv = document.getElementById("output-magic");
+    magicDiv.innerHTML = `
+      <h2>Magic, Debt & McGuffin</h2>
+      <p><strong>Strange McGuffin:</strong><br>
+        Name: ${mcguffin.name}<br>
+        Type: ${mcguffin.type}<br>
+        Reason It Was Made: ${mcguffin.reason}
+      </p>
+      <p><strong>Magic Users & Debt to Magic:</strong></p>
+      <pre>${magicText}</pre>
+    `;
+
+    // Character seed
+    const charDiv = document.getElementById("output-character");
+    charDiv.innerHTML = `
+      <h2>Character Seed (d66 Past / Alignment / Keepsake)</h2>
+      <div class="two-col">
+        <div>
+          <p><strong>Trait:</strong> ${charGen.trait}</p>
+          <p><strong>Race:</strong> ${charGen.race}</p>
+          <p><strong>Class:</strong> ${charGen.class}</p>
+          <p><strong>Age:</strong> ${charGen.age}</p>
+        </div>
+        <div>
+          <p><strong>Past:</strong> ${charGen.past}</p>
+          <p><strong>Alignment:</strong> ${charGen.alignment}</p>
+          <p><strong>Keepsake:</strong> ${charGen.keepsake}</p>
+          <p><strong>Extra Gear:</strong> ${charGen.extra}</p>
+        </div>
+      </div>
+      <p class="small">
+        Use this character as an NPC, rival, or new PC dropped into the hex.  
+        Alignments: Quill (intellect, magic, scholars), Spade (labourers, stoic, loyal), Dagger (combat, cunning, defiant).
+      </p>
+    `;
+  }
+</script>
+</body>
+</html>
